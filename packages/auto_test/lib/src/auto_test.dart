@@ -41,6 +41,7 @@ const FailingTest failingTest = FailingTest();
 const SkippedTest skippedTest = SkippedTest();
 
 /// A marker annotation used to annotate "solo" groups and tests.
+@Deprecated('Dev only')
 const _SoloTest soloTest = _SoloTest();
 
 final List<_Group> _currentGroups = <_Group>[];
