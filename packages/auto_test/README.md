@@ -1,39 +1,27 @@
-<!-- 
-This README describes the package. If you publish this package to pub.dev,
-this README's contents appear on the landing page for your package.
+# auto_test
 
-For information about how to write a good package README, see the guide for
-[writing package pages](https://dart.dev/guides/libraries/writing-package-pages). 
 
-For general information about developing packages, see the Dart guide for
-[creating packages](https://dart.dev/guides/libraries/create-library-packages)
-and the Flutter guide for
-[developing packages and plugins](https://flutter.dev/developing-packages). 
--->
+Support for discovering tests and test suites using reflection.
 
-TODO: Put a short description of the package here that helps potential users
-know whether this package might be useful for them.
+This package follows the xUnit style where each class is a test suite, and each
+method with the name prefix `test_` is a single test.
 
-## Features
+Methods with names starting with `test_` are run using the `test()` function with
+the corresponding name. If the class defines methods `setUp()` or `tearDown()`,
+they are executed before / after each test correspondingly, even if the test fails.
 
-TODO: List what your package can do. Maybe include images, gifs, or videos.
+Methods with names starting with `solo_test_` are run using the `solo_test()` function.
 
-## Getting started
+Methods with names starting with `fail_` are expected to fail.
 
-TODO: List prerequisites and provide or point to information on how to
-start using the package.
+Methods with names starting with `solo_fail_` are run using the `solo_test()` function
+and expected to fail.
 
-## Usage
+Method returning `Future` class instances are asynchronous, so `tearDown()` is
+executed after the returned `Future` completes.
 
-TODO: Include short and useful examples for package users. Add longer examples
-to `/example` folder. 
+## Features and bugs
 
-```dart
-const like = 'sample';
-```
+Please file feature requests and bugs at the [issue tracker][tracker].
 
-## Additional information
-
-TODO: Tell users more about the package: where to find more information, how to 
-contribute to the package, how to file issues, what response they can expect 
-from the package authors, and more.
+[tracker]: https://github.com/amondnet/auto_test/issues
