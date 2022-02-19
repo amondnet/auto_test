@@ -1,5 +1,6 @@
 # auto_test
 
+[![all_packages](https://github.com/amondnet/auto_test/actions/workflows/validate.yaml/badge.svg)](https://github.com/amondnet/auto_test/actions/workflows/validate.yaml)
 
 Support for discovering tests and test suites using reflection.
 
