@@ -1,4 +1,26 @@
 name: d_unit_project
+repository: https://github.com/amondnet/auto_test
 
 packages:
   - packages/**
+
+ide:
+  intellij: true
+
+scripts:
+  analyze:
+    run: melos exec -c 1 -- "dart analyze . --fatal-infos"
+    description: Run dart analyzer in a specific package.
+    select-package:
+      ignore:
+        - "*monorepo*"
+
+  test:
+    description: Run tests in a specific package.
+    run: melos exec --concurrency=1 -- "dart pub get && dart pub run test --reporter expanded"
+    select-package:
+      dir-exists:
+        - "test/"
+
+  format: dart format -o write .
+  version: dart run scripts/generate_version.dart
