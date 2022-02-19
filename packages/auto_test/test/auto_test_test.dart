@@ -1,6 +1,6 @@
+// ignore_for_file: non_constant_identifier_names
 import 'package:auto_test/auto_test.dart';
 import 'package:test/test.dart';
-import 'package:auto_test/auto_test.dart';
 
 void main() {
   defineAutoSuite(() {
@@ -29,7 +29,7 @@ class TestReflectiveLoaderTest {
 
   @failingTest
   Future test_fails_throws_async() {
-    return new Future.error('foo');
+    return Future.error('foo');
   }
 
   @skippedTest

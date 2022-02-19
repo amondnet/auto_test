@@ -231,6 +231,7 @@ Future<Object?> _invokeSymbolIfExists(
   InstanceMirror? closure;
   try {
     closure = instanceMirror.getField(symbol);
+    // ignore: empty_catches
   } on NoSuchMethodError {}
 
   if (closure is ClosureMirror) {
@@ -248,7 +249,7 @@ Future<Object?> _invokeSymbolIfExists(
 Future<Object?>? _runFailingTest(ClassMirror classMirror, Symbol symbol) {
   bool passed = false;
   return runZonedGuarded(() {
-    return Future.sync(() => _runTest(classMirror, symbol)).then<void>((_) {
+    return Future.sync(() => _runTest(classMirror, symbol)).then((_) {
       passed = true;
       test_package.fail('Test passed - expected to fail.');
     }).catchError((e) {
