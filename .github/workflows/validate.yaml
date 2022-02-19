@@ -11,6 +11,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - uses: dart-lang/setup-dart@v1
+      - uses: bluefireteam/melos-action@v1
       - name: "Analyze"
         uses: invertase/github-action-dart-analyzer@v1
         with:
