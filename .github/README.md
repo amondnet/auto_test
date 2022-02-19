@@ -1,0 +1,1 @@
+../packages/auto_test/README.md
