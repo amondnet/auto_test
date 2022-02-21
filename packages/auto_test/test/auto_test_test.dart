@@ -11,8 +11,13 @@ void main() {
 class TestReflectiveLoaderTest {
   @autoTest
   @parameterizedTest
-  void testPasses(int i) {
+  void passes(int i) {
     print(i);
+    expect(true, true);
+  }
+
+  // ignore: non_constant_identifier_names
+  void test_passes() {
     expect(true, true);
   }
 
@@ -22,6 +27,11 @@ class TestReflectiveLoaderTest {
   }
 
   void failTest() {
+    expect(false, true);
+  }
+
+  // ignore: non_constant_identifier_names
+  void fail_test() {
     expect(false, true);
   }
 
@@ -57,6 +67,15 @@ class TestReflectiveLoaderTest {
 
   @skippedTest
   void testTimesOutButSkipped() {
+    while (true) {}
+  }
+
+  // ignore: non_constant_identifier_names
+  void skip_test_timeouts() {
+    while (true) {}
+  }
+
+  void skipTestTimeouts() {
     while (true) {}
   }
 }

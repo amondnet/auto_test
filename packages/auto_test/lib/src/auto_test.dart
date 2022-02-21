@@ -139,25 +139,28 @@ void defineAutoTests(Type type) {
     }
     // soloTest
     if (memberName.startsWith('soloTest') ||
+        memberName.startsWith('solo_test_') ||
         _hasAnnotationInstance(memberMirror, soloTest)) {
       group.addTest(true, memberName, memberMirror, () {
         return _runTest(classMirror, symbol);
       });
     }
     // failTest
-    if (memberName.startsWith('fail')) {
+    if (memberName.startsWith('fail') || memberName.startsWith('fail_')) {
       group.addTest(isSolo, memberName, memberMirror, () {
         return _runFailingTest(classMirror, symbol);
       });
     }
     // soloFail
-    if (memberName.startsWith('soloFail')) {
+    if (memberName.startsWith('soloFail') ||
+        memberName.startsWith('solo_fail_')) {
       group.addTest(true, memberName, memberMirror, () {
         return _runFailingTest(classMirror, symbol);
       });
     }
     // skipTest
-    if (memberName.startsWith('skipTest')) {
+    if (memberName.startsWith('skipTest') ||
+        memberName.startsWith('skip_test_')) {
       group.addSkippedTest(memberName);
     }
   });
