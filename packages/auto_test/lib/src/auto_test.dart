@@ -3,7 +3,6 @@ import 'dart:math';
 import 'dart:mirrors';
 
 import 'package:test/test.dart' as test_package;
-import 'package:meta/meta.dart';
 
 const _AutoTests autoTests = _AutoTests();
 
