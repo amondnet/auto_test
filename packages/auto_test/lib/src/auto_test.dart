@@ -3,6 +3,7 @@ import 'dart:math';
 import 'dart:mirrors';
 
 import 'package:test/test.dart' as test_package;
+import 'package:meta/meta.dart';
 
 const _AutoTests autoTests = _AutoTests();
 
@@ -122,7 +123,7 @@ void defineAutoTests(Type type) {
         _hasAnnotationInstance(memberMirror, soloTest);
 
     // test
-    if (memberName.startsWith('test')) {
+    if (memberName.startsWith('test') || _hasTestAnnotation(memberMirror)) {
       if (_hasSkippedTestAnnotation(memberMirror)) {
         group.addSkippedTest(memberName);
       } else {
@@ -138,7 +139,8 @@ void defineAutoTests(Type type) {
       return;
     }
     // soloTest
-    if (memberName.startsWith('soloTest')) {
+    if (memberName.startsWith('soloTest') ||
+        _hasAnnotationInstance(memberMirror, soloTest)) {
       group.addTest(true, memberName, memberMirror, () {
         return _runTest(classMirror, symbol);
       });
@@ -225,6 +227,11 @@ bool _hasFailingTestAnnotation(MethodMirror method) =>
 
 bool _hasSkippedTestAnnotation(MethodMirror method) =>
     _hasAnnotationInstance(method, skippedTest);
+
+bool _hasTestAnnotation(MethodMirror method) =>
+    _hasAnnotationInstance(method, autoTest) ||
+    _hasFailingTestAnnotation(method) ||
+    _hasSkippedTestAnnotation(method);
 
 Future<Object?> _invokeSymbolIfExists(
     InstanceMirror instanceMirror, Symbol symbol) {

@@ -21,6 +21,15 @@ class TestReflectiveLoaderTest {
     expect(false, true);
   }
 
+  void failTest() {
+    expect(false, true);
+  }
+
+  @failingTest
+  void fAiL() {
+    expect(false, true);
+  }
+
   @failingTest
   void testFailsThrowsSync() {
     throw 'foo';
@@ -31,8 +40,18 @@ class TestReflectiveLoaderTest {
     return Future.error('foo');
   }
 
+  @failingTest
+  Future failsThrowsAsync() {
+    return Future.error('foo');
+  }
+
   @skippedTest
   void testFailsButSkipped() {
+    throw 'foo';
+  }
+
+  @skippedTest
+  void failsButSkipped() {
     throw 'foo';
   }
 
