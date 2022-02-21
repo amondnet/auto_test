@@ -118,11 +118,11 @@ void defineAutoTests(Type type) {
     }
     // prepare information about the method
     String memberName = MirrorSystem.getName(symbol);
-    bool isSolo = memberName.startsWith('solo_') ||
+    bool isSolo = memberName.startsWith('solo') ||
         _hasAnnotationInstance(memberMirror, soloTest);
 
-    // test_
-    if (memberName.startsWith('test_')) {
+    // test
+    if (memberName.startsWith('test')) {
       if (_hasSkippedTestAnnotation(memberMirror)) {
         group.addSkippedTest(memberName);
       } else {
@@ -137,26 +137,26 @@ void defineAutoTests(Type type) {
       }
       return;
     }
-    // solo_test_
-    if (memberName.startsWith('solo_test_')) {
+    // soloTest
+    if (memberName.startsWith('soloTest')) {
       group.addTest(true, memberName, memberMirror, () {
         return _runTest(classMirror, symbol);
       });
     }
-    // fail_test_
-    if (memberName.startsWith('fail_')) {
+    // failTest
+    if (memberName.startsWith('fail')) {
       group.addTest(isSolo, memberName, memberMirror, () {
         return _runFailingTest(classMirror, symbol);
       });
     }
-    // solo_fail_test_
-    if (memberName.startsWith('solo_fail_')) {
+    // soloFail
+    if (memberName.startsWith('soloFail')) {
       group.addTest(true, memberName, memberMirror, () {
         return _runFailingTest(classMirror, symbol);
       });
     }
-    // skip_test_
-    if (memberName.startsWith('skip_test_')) {
+    // skipTest
+    if (memberName.startsWith('skipTest')) {
       group.addSkippedTest(memberName);
     }
   });
