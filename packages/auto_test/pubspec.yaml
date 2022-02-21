@@ -1,6 +1,6 @@
 name: auto_test
 description: Support for discovering tests and test suites using reflection.
-version: 0.1.0
+version: 0.1.0+1
 homepage: https://github.com/amondnet/auto_test
 
 environment:
