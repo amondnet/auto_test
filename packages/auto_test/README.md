@@ -5,23 +5,23 @@
 Support for discovering tests and test suites using reflection.
 
 This package follows the xUnit style where each class is a test suite, and each
-method with the name prefix `test_` or has `@autoTest` is a single test.
+method with the name prefix `test` or has `@autoTest` is a single test.
 
-Methods with names starting with `test_` or have `@autoTest` are run using the [`test()`](https://pub.dev/documentation/dev_test/latest/test/test.html) function with
+Methods with names starting with `test` or have `@autoTest` are run using the [`test()`](https://pub.dev/documentation/dev_test/latest/test/test.html) function with
 the corresponding name. If the class defines methods [`setUp()`](https://pub.dev/documentation/dev_test/latest/test/setUp.html) or [`tearDown()`](https://pub.dev/documentation/dev_test/latest/test/tearDown.html),
 they are executed before / after each test correspondingly, even if the test fails.
 
-Methods with names starting with `solo_test_` or have `@soloTest`  are run using the [`solo_test()`](https://pub.dev/documentation/dev_test/latest/test/solo_test.html) function.
+Methods with names starting with `soloTest` or have `@soloTest`  are run using the [`solo_test()`](https://pub.dev/documentation/dev_test/latest/test/solo_test.html) function.
 
-Methods with names starting with `fail_` or have `@failingTest` are expected to fail.
+Methods with names starting with `fail` or have `@failingTest` are expected to fail.
 
-Methods with names starting with `solo_fail_` are run using the [`solo_test()`](https://pub.dev/documentation/dev_test/latest/test/solo_test.html) function.
+Methods with names starting with `soloFail` are run using the [`solo_test()`](https://pub.dev/documentation/dev_test/latest/test/solo_test.html) function.
 and expected to fail.
 
 Method returning `Future` class instances are asynchronous, so [`tearDown()`](https://pub.dev/documentation/dev_test/latest/test/tearDown.html) is
 executed after the returned `Future` completes.
 
-Methods with 
+Methods with names starting with `skipTest` or have `@skippedTest` are expected to skip.
 
 ## Features and bugs
 

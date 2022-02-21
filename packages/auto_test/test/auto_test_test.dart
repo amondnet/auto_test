@@ -1,4 +1,3 @@
-// ignore_for_file: non_constant_identifier_names
 import 'package:auto_test/auto_test.dart';
 import 'package:test/test.dart';
 
@@ -12,33 +11,33 @@ void main() {
 class TestReflectiveLoaderTest {
   @autoTest
   @parameterizedTest
-  void test_passes(int i) {
+  void testPasses(int i) {
     print(i);
     expect(true, true);
   }
 
   @failingTest
-  void test_fails() {
+  void testFails() {
     expect(false, true);
   }
 
   @failingTest
-  void test_fails_throws_sync() {
+  void testFailsThrowsSync() {
     throw 'foo';
   }
 
   @failingTest
-  Future test_fails_throws_async() {
+  Future testFailsThrowsAsync() {
     return Future.error('foo');
   }
 
   @skippedTest
-  void test_fails_but_skipped() {
+  void testFailsButSkipped() {
     throw 'foo';
   }
 
   @skippedTest
-  void test_times_out_but_skipped() {
+  void testTimesOutButSkipped() {
     while (true) {}
   }
 }
