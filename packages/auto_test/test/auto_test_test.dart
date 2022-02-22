@@ -9,7 +9,24 @@ void main() {
 
 @autoTests
 class TestReflectiveLoaderTest {
+  bool setupCalled = false;
+  bool beforeEachCalled = false;
+
+  void setUp() {
+    setupCalled = true;
+  }
+
+  @beforeEach
+  void testBeforeEach() {
+    beforeEachCalled = true;
+  }
+
   @autoTest
+  void testShouldCalledBeforeEach() {
+    expect(beforeEachCalled, true);
+  }
+
+  @autoSource
   @parameterizedTest
   void passes(int i) {
     print(i);

@@ -23,6 +23,24 @@ executed after the returned `Future` completes.
 
 Methods with names starting with `skipTest` or have `@skippedTest` are expected to skip. [`test(skip: true)`](https://pub.dev/documentation/test_core/latest/test_core.scaffolding/test.html) function.
 
+
+## Parameterized tests
+
+`auto_test` is very easy to use. Just decorate your parameterized test method with the `@autoSource` annotation. That's all. Then `auto_test` will generate arbitrary arguments for the parameters of the test method automatically.
+
+```dart
+@autoTests
+class ParameterizedTextExample {
+  @autoTest
+  @autoSource
+  void parameterizedTest(int a, int b) {
+    Calculator sut = Calculator();
+    int actual = sut.add(a, b);
+    expect(a + b, actual);
+  }
+}
+```
+
 ## Features and bugs
 
 Please file feature requests and bugs at the [issue tracker][tracker].
