@@ -341,6 +341,7 @@ List<dynamic> _generateParams(MethodMirror? memberMirror) {
           final clz = element.type as ClassMirror;
           VariableMirror values =
               clz.declarations[Symbol('values')] as VariableMirror;
+          print(values.isFinal);
           // print(values.type.);
         }
       }
