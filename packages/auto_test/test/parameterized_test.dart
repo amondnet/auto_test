@@ -3,12 +3,12 @@ import 'package:test/test.dart';
 
 void main() {
   defineAutoSuite(() {
-    defineAutoTests(ParameterizedTextExample);
-  }, name: 'ParameterizedTextExample!');
+    defineAutoTests(Parameterized);
+  }, name: 'ParameterizedTest!');
 }
 
 @autoTests
-class ParameterizedTextExample {
+class Parameterized {
   @parameterizedTest
   @autoSource
   void parameterizedTestInt(int a, int b) {
@@ -16,33 +16,10 @@ class ParameterizedTextExample {
     int actual = sut.add(a, b);
     expect(a + b, actual);
   }
-
-  //@parameterizedTest
-  //@autoSource
-  //void enumTest(Month month) {
-  //  print(month);
-  //  expect(month, isA<Month>());
-  //  Month.values;
-  //}
 }
 
 class Calculator {
   int add(int a, int b) {
     return a + b;
   }
-}
-
-enum Month {
-  january,
-  february,
-  march,
-  april,
-  may,
-  june,
-  july,
-  august,
-  september,
-  october,
-  november,
-  december
 }
