@@ -328,21 +328,19 @@ List<dynamic> _generateParams(MethodMirror? memberMirror) {
         switch (element.type.reflectedType) {
           case int:
             parameters.add(Random().nextInt(1024));
-            break;
+            continue;
           case double:
             parameters.add(Random().nextDouble());
-            break;
+            continue;
           case bool:
             parameters.add(Random().nextBool());
-            break;
+            continue;
         }
 
         if ((element.type as ClassMirror).isEnum) {
           final clz = element.type as ClassMirror;
-          VariableMirror values =
-              clz.declarations[Symbol('values')] as VariableMirror;
-          print(values.isFinal);
-          // print(values.type.);
+          List list = clz.getField(Symbol('values')).reflectee;
+          parameters.add(list[Random().nextInt(list.length)]);
         }
       }
     }
