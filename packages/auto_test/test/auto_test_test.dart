@@ -11,19 +11,29 @@ void main() {
 class TestReflectiveLoaderTest {
   bool setupCalled = false;
   bool beforeEachCalled = false;
+  int setUpCount = 0;
 
   void setUp() {
     setupCalled = true;
+    setUpCount++;
   }
 
   @beforeEach
   void testBeforeEach() {
     beforeEachCalled = true;
+    setUpCount++;
+  }
+
+  @beforeEach
+  void testBeforeEach2() {
+    beforeEachCalled = true;
+    setUpCount++;
   }
 
   @autoTest
   void testShouldCalledBeforeEach() {
     expect(beforeEachCalled, true);
+    expect(setUpCount, 3);
   }
 
   @autoSource

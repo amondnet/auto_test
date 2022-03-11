@@ -136,7 +136,7 @@ void defineAutoTests(Type type) {
 
     // setUp
     if (_hasAnnotationInstance(memberMirror, beforeEach)) {
-      group.addSetUp(() => _runSetUp(classMirror, symbol, memberMirror));
+      group.addSetUp((instance) => _runSetUp(instance, symbol, memberMirror));
       return;
     }
 
@@ -150,7 +150,7 @@ void defineAutoTests(Type type) {
               _isCheckedMode && _hasAssertFailingTestAnnotation(memberMirror)) {
             return _runFailingTest(classMirror, symbol);
           } else {
-            return _runTest(classMirror, symbol, memberMirror);
+            return _runTest(classMirror, symbol, memberMirror: memberMirror, setUp: group.setUp);
           }
         });
       }
@@ -161,7 +161,7 @@ void defineAutoTests(Type type) {
         memberName.startsWith('solo_test_') ||
         _hasAnnotationInstance(memberMirror, soloTest)) {
       group.addTest(true, memberName, memberMirror, () {
-        return _runTest(classMirror, symbol, memberMirror);
+        return _runTest(classMirror, symbol, memberMirror: memberMirror);
       });
     }
     // failTest
@@ -300,22 +300,19 @@ Future<Object?>? _runFailingTest(ClassMirror classMirror, Symbol symbol) {
 }
 
 Future<Object?> _runTest(ClassMirror classMirror, Symbol symbol,
-    [MethodMirror? memberMirror]) {
+    {Function(InstanceMirror)? setUp, MethodMirror? memberMirror}) {
   InstanceMirror instanceMirror = classMirror.newInstance(Symbol(''), []);
 
   final parameters = _generateParams(memberMirror);
 
   return _invokeSymbolIfExists(instanceMirror, #setUp)
+      .then((_) => setUp?.call(instanceMirror))
       .then((_) => instanceMirror.invoke(symbol, parameters).reflectee)
       .whenComplete(() => _invokeSymbolIfExists(instanceMirror, #tearDown));
 }
 
-Future<Object?> _runSetUp(ClassMirror classMirror, Symbol symbol,
+Future<Object?> _runSetUp(InstanceMirror instanceMirror, Symbol symbol,
     [MethodMirror? memberMirror]) async {
-  InstanceMirror instanceMirror = classMirror.newInstance(Symbol(''), []);
-
-  print(instanceMirror);
-  print(symbol);
   final parameters = _generateParams(memberMirror);
 
   return instanceMirror.invoke(symbol, parameters).reflectee;
@@ -338,12 +335,9 @@ List<dynamic> _generateParams(MethodMirror? memberMirror) {
             parameters.add(Random().nextBool());
             break;
         }
-        print(element.type.reflectedType);
-        print(element.type);
+
         if ((element.type as ClassMirror).isEnum) {
           final clz = element.type as ClassMirror;
-          print('enum');
-
           VariableMirror values =
               clz.declarations[Symbol('values')] as VariableMirror;
           // print(values.type.);
@@ -394,7 +388,7 @@ class _Group {
   final bool isSolo;
   final String name;
   final List<_Test> tests = <_Test>[];
-  final List<Function> setUps = <Function>[];
+  final List<Function(InstanceMirror)> setUps = <Function(InstanceMirror)>[];
 
   _Group(this.isSolo, this.name);
 
@@ -424,11 +418,17 @@ class _Group {
   ///
   /// Each callback at the top level or in a given group will be run in the order
   /// they were declared.
-  void addSetUp(dynamic Function() callback) {
+  void addSetUp(dynamic Function(InstanceMirror) callback) {
     setUps.add(callback);
   }
 
   void addSetUpAll() {}
+
+  void setUp(InstanceMirror instanceMirror) {
+    for (var setUp in setUps) {
+      setUp(instanceMirror);
+    }
+  }
 }
 
 /// A marker annotation used to annotate "solo" groups and tests.
