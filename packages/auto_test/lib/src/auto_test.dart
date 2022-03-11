@@ -150,7 +150,8 @@ void defineAutoTests(Type type) {
               _isCheckedMode && _hasAssertFailingTestAnnotation(memberMirror)) {
             return _runFailingTest(classMirror, symbol);
           } else {
-            return _runTest(classMirror, symbol, memberMirror: memberMirror, setUp: group.setUp);
+            return _runTest(classMirror, symbol,
+                memberMirror: memberMirror, setUp: group.setUp);
           }
         });
       }
