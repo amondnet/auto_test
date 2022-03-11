@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:math';
 import 'dart:mirrors';
 
+import 'package:auto_test/auto_test.dart';
 import 'package:test/test.dart' as test_package;
 
 const _AutoTests autoTests = _AutoTests();
@@ -28,6 +29,18 @@ const AutoSource autoSource = AutoSource();
 
 class AutoSource {
   const AutoSource();
+}
+
+class ValueSource {
+  final List<int>? ints;
+  final List<String>? strings;
+  final List<double>? doubles;
+
+  const ValueSource({
+    this.ints,
+    this.strings,
+    this.doubles,
+  });
 }
 
 /// A marker annotation used to annotate test methods which are expected to fail
@@ -121,6 +134,12 @@ void defineAutoTests(Type type) {
     bool isSolo = memberName.startsWith('solo') ||
         _hasAnnotationInstance(memberMirror, soloTest);
 
+    // setUp
+    if (_hasAnnotationInstance(memberMirror, beforeEach)) {
+      group.addSetUp((instance) => _runSetUp(instance, symbol, memberMirror));
+      return;
+    }
+
     // test
     if (memberName.startsWith('test') || _hasTestAnnotation(memberMirror)) {
       if (_hasSkippedTestAnnotation(memberMirror)) {
@@ -131,7 +150,8 @@ void defineAutoTests(Type type) {
               _isCheckedMode && _hasAssertFailingTestAnnotation(memberMirror)) {
             return _runFailingTest(classMirror, symbol);
           } else {
-            return _runTest(classMirror, symbol, memberMirror);
+            return _runTest(classMirror, symbol,
+                memberMirror: memberMirror, setUp: group.setUp);
           }
         });
       }
@@ -142,7 +162,7 @@ void defineAutoTests(Type type) {
         memberName.startsWith('solo_test_') ||
         _hasAnnotationInstance(memberMirror, soloTest)) {
       group.addTest(true, memberName, memberMirror, () {
-        return _runTest(classMirror, symbol);
+        return _runTest(classMirror, symbol, memberMirror: memberMirror);
       });
     }
     // failTest
@@ -232,6 +252,7 @@ bool _hasSkippedTestAnnotation(MethodMirror method) =>
 
 bool _hasTestAnnotation(MethodMirror method) =>
     _hasAnnotationInstance(method, autoTest) ||
+    _hasAnnotationInstance(method, parameterizedTest) ||
     _hasFailingTestAnnotation(method) ||
     _hasSkippedTestAnnotation(method);
 
@@ -280,29 +301,53 @@ Future<Object?>? _runFailingTest(ClassMirror classMirror, Symbol symbol) {
 }
 
 Future<Object?> _runTest(ClassMirror classMirror, Symbol symbol,
-    [MethodMirror? memberMirror]) {
+    {Function(InstanceMirror)? setUp, MethodMirror? memberMirror}) {
   InstanceMirror instanceMirror = classMirror.newInstance(Symbol(''), []);
 
+  final parameters = _generateParams(memberMirror);
+
+  return _invokeSymbolIfExists(instanceMirror, #setUp)
+      .then((_) => setUp?.call(instanceMirror))
+      .then((_) => instanceMirror.invoke(symbol, parameters).reflectee)
+      .whenComplete(() => _invokeSymbolIfExists(instanceMirror, #tearDown));
+}
+
+Future<Object?> _runSetUp(InstanceMirror instanceMirror, Symbol symbol,
+    [MethodMirror? memberMirror]) async {
+  final parameters = _generateParams(memberMirror);
+
+  return instanceMirror.invoke(symbol, parameters).reflectee;
+}
+
+List<dynamic> _generateParams(MethodMirror? memberMirror) {
   var parameters = [];
   if (memberMirror != null && memberMirror.parameters.isNotEmpty) {
-    for (var element in memberMirror.parameters) {
-      switch (element.type.reflectedType) {
-        case int:
-          parameters.add(Random().nextInt(1024));
-          break;
-        case double:
-          parameters.add(Random().nextDouble());
-          break;
-        case bool:
-          parameters.add(Random().nextBool());
-          break;
+    if (_hasAnnotationInstance(memberMirror, autoSource)) {
+      // auto_source
+      for (var element in memberMirror.parameters) {
+        switch (element.type.reflectedType) {
+          case int:
+            parameters.add(Random().nextInt(1024));
+            break;
+          case double:
+            parameters.add(Random().nextDouble());
+            break;
+          case bool:
+            parameters.add(Random().nextBool());
+            break;
+        }
+
+        if ((element.type as ClassMirror).isEnum) {
+          final clz = element.type as ClassMirror;
+          VariableMirror values =
+              clz.declarations[Symbol('values')] as VariableMirror;
+          print(values.isFinal);
+          // print(values.type.);
+        }
       }
     }
   }
-
-  return _invokeSymbolIfExists(instanceMirror, #setUp)
-      .then((_) => instanceMirror.invoke(symbol, parameters).reflectee)
-      .whenComplete(() => _invokeSymbolIfExists(instanceMirror, #tearDown));
+  return parameters;
 }
 
 typedef _TestFunction = dynamic Function();
@@ -345,6 +390,7 @@ class _Group {
   final bool isSolo;
   final String name;
   final List<_Test> tests = <_Test>[];
+  final List<Function(InstanceMirror)> setUps = <Function(InstanceMirror)>[];
 
   _Group(this.isSolo, this.name);
 
@@ -361,6 +407,29 @@ class _Group {
     var timeout =
         _getAnnotationInstance(memberMirror, TestTimeout) as TestTimeout?;
     tests.add(_Test(isSolo, fullName, function, timeout?._timeout));
+  }
+
+  /// Registers a function to be run before tests.
+  ///
+  /// This function will be called before each test is run. [callback] may be
+  /// asynchronous; if so, it must return a [Future].
+  ///
+  /// If this is called within a test group, it applies only to tests in that
+  /// group. [callback] will be run after any set-up callbacks in parent groups or
+  /// at the top level.
+  ///
+  /// Each callback at the top level or in a given group will be run in the order
+  /// they were declared.
+  void addSetUp(dynamic Function(InstanceMirror) callback) {
+    setUps.add(callback);
+  }
+
+  void addSetUpAll() {}
+
+  void setUp(InstanceMirror instanceMirror) {
+    for (var setUp in setUps) {
+      setUp(instanceMirror);
+    }
   }
 }
 
