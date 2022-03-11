@@ -17,13 +17,13 @@ class ParameterizedTextExample {
     expect(a + b, actual);
   }
 
-  @parameterizedTest
-  @autoSource
-  void enumTest(Month month) {
-    print(month);
-    expect(month, isA<Month>());
-    Month.values;
-  }
+  //@parameterizedTest
+  //@autoSource
+  //void enumTest(Month month) {
+  //  print(month);
+  //  expect(month, isA<Month>());
+  //  Month.values;
+  //}
 }
 
 class Calculator {
