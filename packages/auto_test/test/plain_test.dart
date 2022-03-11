@@ -11,6 +11,12 @@ void main() {
     setUpCalled = true;
     setUpCallCount++;
   });
+
+  tearDown(() {
+    setUpCalled = false;
+    setUpCallCount = 0;
+  });
+
   test('test pass', () {
     expect(true, true);
   });
