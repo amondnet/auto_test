@@ -17,8 +17,17 @@ scripts:
 
   test:
     description: Run tests in a specific package.
-    run: melos exec --concurrency=1 -- "dart pub get && dart pub run test --reporter expanded"
+    run: melos exec --concurrency=1 -- "dart pub get && dart test --reporter expanded"
     select-package:
+      depends-on: "test"
+      dir-exists:
+        - "test/"
+
+  test:coverage:
+    description: Run tests in a specific package.
+    run: melos exec --concurrency=1 -- "dart pub get && dart run test_coverage"
+    select-package:
+      depends-on: "test_coverage"
       dir-exists:
         - "test/"
 
