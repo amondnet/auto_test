@@ -12,14 +12,22 @@ class Parameterized {
   @parameterizedTest
   @autoSource
   void parameterizedTestInt(int a, int b) {
-    Calculator sut = Calculator();
+    Calculator<int> sut = Calculator();
     int actual = sut.add(a, b);
+    expect(a + b, actual);
+  }
+
+  @parameterizedTest
+  @autoSource
+  void doubleTest(double a, double b) {
+    Calculator<double> sut = Calculator();
+    double actual = sut.add(a, b);
     expect(a + b, actual);
   }
 }
 
-class Calculator {
-  int add(int a, int b) {
-    return a + b;
+class Calculator<T extends num> {
+  T add(T a, T b) {
+    return (a + b) as T;
   }
 }
