@@ -29,6 +29,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "2.8.2"
+  auto_test:
+    dependency: "direct dev"
+    description:
+      path: "../auto_test"
+      relative: true
+    source: path
+    version: "0.1.0+1"
   boolean_selector:
     dependency: transitive
     description:
@@ -65,7 +72,7 @@ packages:
     source: hosted
     version: "2.0.6"
   build_runner:
-    dependency: transitive
+    dependency: "direct dev"
     description:
       name: build_runner
       url: "https://pub.dartlang.org"
@@ -472,3 +479,4 @@ packages:
     version: "3.1.0"
 sdks:
   dart: ">=2.14.0 <3.0.0"
+  flutter: ">=2.10.0"
