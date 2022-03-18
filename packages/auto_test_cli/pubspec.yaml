@@ -1,0 +1,13 @@
+name: auto_test_cli
+description: Support for discovering tests and test suites using reflection.
+version: 0.1.0
+homepage: https://github.com/amondnet/auto_test
+
+environment:
+  sdk: '>=2.16.0 <3.0.0'
+
+dependencies:
+  spec_cli: ^0.1.2+1
+dev_dependencies:
+  lints: ^1.0.0
+  test: any
