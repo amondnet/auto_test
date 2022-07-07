@@ -8,19 +8,28 @@ import 'package:test/test.dart' as test_package;
 const Test autoTest = Test();
 
 class Test extends Reflectable {
-  const Test();
+  const Test()
+      : super(metadataCapability, declarationsCapability,
+            reflectedTypeCapability);
 }
 
 const ParameterizedTest parameterizedTest = ParameterizedTest();
 
-class ParameterizedTest {
-  const ParameterizedTest();
+class ParameterizedTest extends Reflectable {
+  const ParameterizedTest()
+      : super(metadataCapability, declarationsCapability,
+            reflectedTypeCapability, typingCapability);
 }
 
 const AutoSource autoSource = AutoSource();
 
-class AutoSource {
-  const AutoSource();
+class AutoSource extends Reflectable {
+  const AutoSource()
+      : super(
+          metadataCapability,
+          declarationsCapability,
+          reflectedTypeCapability,
+        );
 }
 
 class ValueSource {
@@ -308,10 +317,27 @@ List<dynamic> _generateParams(MethodMirror? memberMirror) {
   if (memberMirror != null && memberMirror.parameters.isNotEmpty) {
     if (_hasAnnotationInstance(memberMirror, autoSource)) {
       // auto_source
-      for (var element in memberMirror.parameters) {
-        switch (element.type.reflectedType) {
+      for (ParameterMirror element in memberMirror.parameters) {
+        switch (element.reflectedType) {
           case int:
-            parameters.add(Random().nextInt(1024));
+
+            var minValue = 0;
+            var maxValue = 1024;
+            final minAnnotation = element.metadata
+                .where((annotation) => annotation is Min);
+            if ( minAnnotation.isNotEmpty  ) {
+              final annotation = minAnnotation.first as Min;
+              minValue = annotation.value;
+            }
+            final maxAnnotation = element.metadata
+                .where((annotation) => annotation is Max);
+            if ( maxAnnotation.isNotEmpty  ) {
+              final annotation = maxAnnotation.first as Max;
+              maxValue = annotation.value;
+            }
+            //if ( element.)
+            final intValue = Random().nextInt(maxValue - minValue) + minValue;
+            parameters.add(intValue);
             continue;
           case double:
             parameters.add(Random().nextDouble());

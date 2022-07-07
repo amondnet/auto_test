@@ -6,8 +6,6 @@ const AutoTests autoTests = AutoTests();
 /// for the annotated classes.
 class AutoTests extends Reflectable {
   const AutoTests()
-      : super(
-          invokingCapability,
-          metadataCapability,
-      declarationsCapability);
+      : super(invokingCapability, metadataCapability, declarationsCapability,
+            reflectedTypeCapability);
 }
