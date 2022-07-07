@@ -1,5 +1,5 @@
 name: auto_test_cli
-description: Support for discovering tests and test suites using reflection.
+description: CLI for AutoTest - a testing framework for Dart & Flutter.
 version: 0.0.0
 homepage: https://github.com/amondnet/auto_test
 
@@ -8,7 +8,12 @@ environment:
 
 dependencies:
   spec_cli: ^0.1.2+1
+  args: ^2.1.1
+  melos: ^1.5.1
   pubspec: ^2.1.0
 dev_dependencies:
   lints: ^1.0.0
   test: any
+
+executables:
+  auto: main
