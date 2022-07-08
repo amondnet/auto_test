@@ -320,18 +320,17 @@ List<dynamic> _generateParams(MethodMirror? memberMirror) {
       for (ParameterMirror element in memberMirror.parameters) {
         switch (element.reflectedType) {
           case int:
-
             var minValue = 0;
             var maxValue = 1024;
-            final minAnnotation = element.metadata
-                .where((annotation) => annotation is Min);
-            if ( minAnnotation.isNotEmpty  ) {
+            final minAnnotation =
+                element.metadata.where((annotation) => annotation is Min);
+            if (minAnnotation.isNotEmpty) {
               final annotation = minAnnotation.first as Min;
               minValue = annotation.value;
             }
-            final maxAnnotation = element.metadata
-                .where((annotation) => annotation is Max);
-            if ( maxAnnotation.isNotEmpty  ) {
+            final maxAnnotation =
+                element.metadata.where((annotation) => annotation is Max);
+            if (maxAnnotation.isNotEmpty) {
               final annotation = maxAnnotation.first as Max;
               maxValue = annotation.value;
             }

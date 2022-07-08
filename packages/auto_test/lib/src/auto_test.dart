@@ -5,7 +5,6 @@ import 'dart:mirrors';
 import 'package:auto_test/auto_test.dart';
 import 'package:test/test.dart' as test_package;
 
-
 const Test autoTest = Test();
 
 class Test {
