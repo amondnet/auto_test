@@ -1,14 +1,19 @@
-name: auto_test
+name: flutter_example
 description: Support for discovering tests and test suites using reflection.
-version: 0.1.0+1
+version: 0.1.0
 homepage: https://github.com/amondnet/auto_test
-
+publish_to: none
 environment:
   sdk: '>=2.12.0 <3.0.0'
-
+  flutter: '>=2.10.0 <3.0.0'
 dependencies:
   test: '>=1.16.0 <2.0.0'
-  reflectable:
+
 dev_dependencies:
   lints: ^1.0.0
-  test_coverage:
+  test_cov:
+  flutter_auto_test:
+    path: ../flutter_auto_test
+  auto_test:
+    path: ../auto_test
+  build_runner:

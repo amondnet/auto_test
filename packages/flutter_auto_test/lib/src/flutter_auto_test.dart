@@ -1,27 +1,35 @@
 import 'dart:async';
 import 'dart:math';
-import 'dart:mirrors';
 
-import 'package:auto_test/auto_test.dart';
+import 'package:flutter_auto_test/src/annotations.dart';
+import 'package:reflectable/reflectable.dart';
 import 'package:test/test.dart' as test_package;
-
 
 const Test autoTest = Test();
 
-class Test {
-  const Test();
+class Test extends Reflectable {
+  const Test()
+      : super(metadataCapability, declarationsCapability,
+            reflectedTypeCapability);
 }
 
 const ParameterizedTest parameterizedTest = ParameterizedTest();
 
-class ParameterizedTest {
-  const ParameterizedTest();
+class ParameterizedTest extends Reflectable {
+  const ParameterizedTest()
+      : super(metadataCapability, declarationsCapability,
+            reflectedTypeCapability, typingCapability);
 }
 
 const AutoSource autoSource = AutoSource();
 
-class AutoSource {
-  const AutoSource();
+class AutoSource extends Reflectable {
+  const AutoSource()
+      : super(
+          metadataCapability,
+          declarationsCapability,
+          reflectedTypeCapability,
+        );
 }
 
 class ValueSource {
@@ -100,36 +108,30 @@ void defineAutoSuite(void Function() define, {String name = ''}) {
 /// method invocation. If method returns [Future] to test some asynchronous
 /// behavior, then `tearDown` will be invoked in `Future.complete`.
 void defineAutoTests(Type type) {
-  ClassMirror classMirror = reflectClass(type);
-  if (!classMirror.metadata.any((InstanceMirror annotation) =>
-      annotation.type.reflectedType == AutoTests)) {
-    String name = MirrorSystem.getName(classMirror.qualifiedName);
-    throw Exception('Class $name must have annotation "@autoTests" '
-        'in order to be run by runAutoTests.');
-  }
+  ClassMirror classMirror = autoTests.reflectType(type) as ClassMirror;
 
   _Group group;
   {
     bool isSolo = _hasAnnotationInstance(classMirror, soloTest);
-    String className = MirrorSystem.getName(classMirror.simpleName);
+    String className = classMirror.simpleName;
     group = _Group(isSolo, _combineNames(_currentSuiteName, className));
     _currentGroups.add(group);
   }
 
   classMirror.instanceMembers
-      .forEach((Symbol symbol, MethodMirror memberMirror) {
+      .forEach((String memberName, MethodMirror memberMirror) {
     // we need only methods
     if (!memberMirror.isRegularMethod) {
       return;
     }
     // prepare information about the method
-    String memberName = MirrorSystem.getName(symbol);
     bool isSolo = memberName.startsWith('solo') ||
         _hasAnnotationInstance(memberMirror, soloTest);
 
     // setUp
     if (_hasAnnotationInstance(memberMirror, beforeEach)) {
-      group.addSetUp((instance) => _runSetUp(instance, symbol, memberMirror));
+      group.addSetUp(
+          (instance) => _runSetUp(instance, memberName, memberMirror));
       return;
     }
 
@@ -141,9 +143,9 @@ void defineAutoTests(Type type) {
         group.addTest(isSolo, memberName, memberMirror, () {
           if (_hasFailingTestAnnotation(memberMirror) ||
               _isCheckedMode && _hasAssertFailingTestAnnotation(memberMirror)) {
-            return _runFailingTest(classMirror, symbol);
+            return _runFailingTest(classMirror, memberName);
           } else {
-            return _runTest(classMirror, symbol,
+            return _runTest(classMirror, memberName,
                 memberMirror: memberMirror, setUp: group.setUp);
           }
         });
@@ -155,20 +157,20 @@ void defineAutoTests(Type type) {
         memberName.startsWith('solo_test_') ||
         _hasAnnotationInstance(memberMirror, soloTest)) {
       group.addTest(true, memberName, memberMirror, () {
-        return _runTest(classMirror, symbol, memberMirror: memberMirror);
+        return _runTest(classMirror, memberName, memberMirror: memberMirror);
       });
     }
     // failTest
     if (memberName.startsWith('fail') || memberName.startsWith('fail_')) {
       group.addTest(isSolo, memberName, memberMirror, () {
-        return _runFailingTest(classMirror, symbol);
+        return _runFailingTest(classMirror, memberName);
       });
     }
     // soloFail
     if (memberName.startsWith('soloFail') ||
         memberName.startsWith('solo_fail_')) {
       group.addTest(true, memberName, memberMirror, () {
-        return _runFailingTest(classMirror, symbol);
+        return _runFailingTest(classMirror, memberName);
       });
     }
     // skipTest
@@ -222,17 +224,16 @@ String _combineNames(String base, String addition) {
 }
 
 Object? _getAnnotationInstance(DeclarationMirror declaration, Type type) {
-  for (InstanceMirror annotation in declaration.metadata) {
-    if (annotation.reflectee.runtimeType == type) {
-      return annotation.reflectee;
+  for (var annotation in declaration.metadata) {
+    if (annotation == type) {
+      return annotation;
     }
   }
   return null;
 }
 
 bool _hasAnnotationInstance(DeclarationMirror declaration, instance) =>
-    declaration.metadata.any((InstanceMirror annotation) =>
-        identical(annotation.reflectee, instance));
+    declaration.metadata.any((annotation) => identical(annotation, instance));
 
 bool _hasAssertFailingTestAnnotation(MethodMirror method) =>
     _hasAnnotationInstance(method, assertFailingTest);
@@ -250,17 +251,16 @@ bool _hasTestAnnotation(MethodMirror method) =>
     _hasSkippedTestAnnotation(method);
 
 Future<Object?> _invokeSymbolIfExists(
-    InstanceMirror instanceMirror, Symbol symbol) {
+    InstanceMirror instanceMirror, String memberName) {
   Object? invocationResult;
   InstanceMirror? closure;
   try {
-    closure = instanceMirror.getField(symbol);
+    if (instanceMirror.type.declarations.containsKey(memberName)) {
+      invocationResult = instanceMirror.invoke(memberName, []);
+    }
     // ignore: empty_catches
   } on NoSuchMethodError {}
 
-  if (closure is ClosureMirror) {
-    invocationResult = closure.apply([]).reflectee;
-  }
   return Future.value(invocationResult);
 }
 
@@ -270,11 +270,11 @@ Future<Object?> _invokeSymbolIfExists(
 /// - The test fails by throwing an exception
 /// - The test returns a future which completes with an error.
 /// - An exception is thrown to the zone handler from a timer task.
-Future<Object?>? _runFailingTest(ClassMirror classMirror, Symbol symbol) {
+Future<Object?>? _runFailingTest(ClassMirror classMirror, String memberName) {
   bool passed = false;
   return runZonedGuarded(() {
     // ignore: void_checks
-    return Future.sync(() => _runTest(classMirror, symbol)).then<void>((_) {
+    return Future.sync(() => _runTest(classMirror, memberName)).then<void>((_) {
       passed = true;
       test_package.fail('Test passed - expected to fail.');
     }).catchError((e) {
@@ -293,23 +293,23 @@ Future<Object?>? _runFailingTest(ClassMirror classMirror, Symbol symbol) {
   });
 }
 
-Future<Object?> _runTest(ClassMirror classMirror, Symbol symbol,
+Future<Object?> _runTest(ClassMirror classMirror, String memberName,
     {Function(InstanceMirror)? setUp, MethodMirror? memberMirror}) {
-  InstanceMirror instanceMirror = classMirror.newInstance(Symbol(''), []);
-
+  Object instance = classMirror.newInstance('', []);
+  InstanceMirror instanceMirror = autoTests.reflect(instance);
   final parameters = _generateParams(memberMirror);
 
-  return _invokeSymbolIfExists(instanceMirror, #setUp)
+  return _invokeSymbolIfExists(instanceMirror, 'setUp')
       .then((_) => setUp?.call(instanceMirror))
-      .then((_) => instanceMirror.invoke(symbol, parameters).reflectee)
-      .whenComplete(() => _invokeSymbolIfExists(instanceMirror, #tearDown));
+      .then((_) => instanceMirror.invoke(memberName, parameters))
+      .whenComplete(() => _invokeSymbolIfExists(instanceMirror, 'tearDown'));
 }
 
-Future<Object?> _runSetUp(InstanceMirror instanceMirror, Symbol symbol,
+Future<Object?> _runSetUp(InstanceMirror instanceMirror, String memberName,
     [MethodMirror? memberMirror]) async {
   final parameters = _generateParams(memberMirror);
 
-  return instanceMirror.invoke(symbol, parameters).reflectee;
+  return instanceMirror.invoke(memberName, parameters);
 }
 
 List<dynamic> _generateParams(MethodMirror? memberMirror) {
@@ -317,10 +317,27 @@ List<dynamic> _generateParams(MethodMirror? memberMirror) {
   if (memberMirror != null && memberMirror.parameters.isNotEmpty) {
     if (_hasAnnotationInstance(memberMirror, autoSource)) {
       // auto_source
-      for (var element in memberMirror.parameters) {
-        switch (element.type.reflectedType) {
+      for (ParameterMirror element in memberMirror.parameters) {
+        switch (element.reflectedType) {
           case int:
-            parameters.add(Random().nextInt(1024));
+
+            var minValue = 0;
+            var maxValue = 1024;
+            final minAnnotation = element.metadata
+                .where((annotation) => annotation is Min);
+            if ( minAnnotation.isNotEmpty  ) {
+              final annotation = minAnnotation.first as Min;
+              minValue = annotation.value;
+            }
+            final maxAnnotation = element.metadata
+                .where((annotation) => annotation is Max);
+            if ( maxAnnotation.isNotEmpty  ) {
+              final annotation = maxAnnotation.first as Max;
+              maxValue = annotation.value;
+            }
+            //if ( element.)
+            final intValue = Random().nextInt(maxValue - minValue) + minValue;
+            parameters.add(intValue);
             continue;
           case double:
             parameters.add(Random().nextDouble());
@@ -332,7 +349,7 @@ List<dynamic> _generateParams(MethodMirror? memberMirror) {
 
         if ((element.type as ClassMirror).isEnum) {
           final clz = element.type as ClassMirror;
-          List list = clz.getField(Symbol('values')).reflectee;
+          List list = clz.invokeGetter('values') as List;
           parameters.add(list[Random().nextInt(list.length)]);
         }
       }
