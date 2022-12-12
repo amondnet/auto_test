@@ -30,6 +30,20 @@ class Parameterized {
   void stringTest(String a, String b) {
     expect(a, isNotNull);
   }
+
+  @parameterizedTest
+  @autoSource
+  void uriTest(Uri a, Uri b) {
+    expect(a, isNotNull);
+    expect(b, isNotNull);
+  }
+
+  @parameterizedTest
+  @autoSource
+  void dateTimeTest(DateTime a, DateTime b) {
+    expect(a, isNotNull);
+    expect(a, isNot(b));
+  }
 }
 
 class Calculator<T extends num> {

@@ -3,6 +3,7 @@ import 'dart:math';
 import 'dart:mirrors';
 
 import 'package:auto_test/auto_test.dart';
+import 'package:auto_test/src/generator/url_generator.dart';
 import 'package:test/test.dart' as test_package;
 import 'package:uuid/uuid.dart';
 
@@ -67,7 +68,6 @@ final bool _isCheckedMode = () {
 }();
 
 final _uuid = Uuid();
-
 
 /// Run the [define] function parameter that calls [defineAutoSuite] to
 /// add normal and "solo" tests, and also calls [defineAutoSuite] to
@@ -335,6 +335,12 @@ List<dynamic> _generateParams(MethodMirror? memberMirror) {
             continue;
           case String:
             parameters.add(_uuid.v4());
+            continue;
+          case Uri:
+            parameters.add(UrlGenerator().generate());
+            continue;
+          case DateTime:
+            parameters.add(Factories.createLocalDateTime());
             continue;
         }
 
