@@ -24,6 +24,12 @@ class Parameterized {
     double actual = sut.add(a, b);
     expect(a + b, actual);
   }
+
+  @parameterizedTest
+  @autoSource
+  void stringTest(String a, String b) {
+    expect(a, isNotNull);
+  }
 }
 
 class Calculator<T extends num> {

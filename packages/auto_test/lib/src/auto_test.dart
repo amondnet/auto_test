@@ -4,6 +4,9 @@ import 'dart:mirrors';
 
 import 'package:auto_test/auto_test.dart';
 import 'package:test/test.dart' as test_package;
+import 'package:uuid/uuid.dart';
+
+import 'generator/factories.dart';
 
 const Test autoTest = Test();
 
@@ -62,6 +65,9 @@ final bool _isCheckedMode = () {
     return true;
   }
 }();
+
+final _uuid = Uuid();
+
 
 /// Run the [define] function parameter that calls [defineAutoSuite] to
 /// add normal and "solo" tests, and also calls [defineAutoSuite] to
@@ -319,13 +325,16 @@ List<dynamic> _generateParams(MethodMirror? memberMirror) {
       for (var element in memberMirror.parameters) {
         switch (element.type.reflectedType) {
           case int:
-            parameters.add(Random().nextInt(1024));
+            parameters.add(Factories.createInt());
             continue;
           case double:
-            parameters.add(Random().nextDouble());
+            parameters.add(Factories.createDouble());
             continue;
           case bool:
-            parameters.add(Random().nextBool());
+            parameters.add(Factories.createBool());
+            continue;
+          case String:
+            parameters.add(_uuid.v4());
             continue;
         }
 
