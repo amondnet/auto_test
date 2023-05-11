@@ -3,7 +3,7 @@ import 'dart:math';
 
 import 'package:flutter_auto_test/src/annotations.dart';
 import 'package:reflectable/reflectable.dart';
-import 'package:test/test.dart' as test_package;
+import 'package:test_api/test_api.dart' as test_package;
 
 const Test autoTest = Test();
 
@@ -346,7 +346,7 @@ List<dynamic> _generateParams(MethodMirror? memberMirror) {
             continue;
         }
 
-        if ((element.type as ClassMirror).isEnum) {
+        if (element.type is ClassMirror && (element.type as ClassMirror).isEnum) {
           final clz = element.type as ClassMirror;
           List list = clz.invokeGetter('values') as List;
           parameters.add(list[Random().nextInt(list.length)]);

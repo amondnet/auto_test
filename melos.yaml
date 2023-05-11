@@ -3,9 +3,15 @@ repository: https://github.com/amondnet/auto_test
 
 packages:
   - packages/**
-
+ignore:
+  - "packages/**/example"
+  - packages/flutter_example
+  - packages/asserts
+  - packages
 ide:
   intellij: true
+
+sdkPath: .fvm/flutter_sdk
 
 scripts:
   analyze:
@@ -25,9 +31,9 @@ scripts:
 
   test:coverage:
     description: Run tests in a specific package.
-    run: melos exec --concurrency=1 -- "dart pub get && dart run test_coverage"
+    run: melos exec --concurrency=1 -- "dart pub get  && dart run test --coverage=./coverage test/full_coverage_test.dart"
     select-package:
-      depends-on: "test_coverage"
+      depends-on: "test"
       dir-exists:
         - "test/"
 

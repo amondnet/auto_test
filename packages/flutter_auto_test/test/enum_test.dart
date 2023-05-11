@@ -34,6 +34,7 @@ class EnumTest {
   }
 }
 
+@autoTests
 enum Month {
   january,
   february,
@@ -49,4 +50,5 @@ enum Month {
   december
 }
 
+@autoTests
 enum Day { sunday, monday, tuesday, wednesday, thursday, friday, saturday }
